@@ -1,37 +1,52 @@
-import { cleanLines } from './model.mjs';
-const input = document.querySelector('#input');
-const output = document.querySelector('#output');
-const status = document.querySelector('#status');
-const copy = document.querySelector('#copy');
-function update() {
-  const result = cleanLines(input.value);
-  output.value = result.text;
-  status.textContent = `${result.count} unique ${result.count === 1 ? 'line' : 'lines'}; ${result.removed} ${result.removed === 1 ? 'duplicate' : 'duplicates'} removed.`;
-  copy.disabled = result.count === 0;
+import {byId as el, element, option, loadData, csvDownload} from "./shared.mjs";
+import {fields,selectRows,changedFields} from "./model.mjs";
+const pageSize=35;
+let all=[], matches=[], page=0, dataset, currentKey;
+let saved=new Set();
+try { saved=new Set(JSON.parse(localStorage.getItem("coolcode:prefixdiary:saved"))||[]); } catch {}
+function details(key,focus=false) {
+  const box=el("record"), attrs=dataset.rows[key];currentKey=key;
+  if (!attrs) {box.hidden=true;return;}
+  const heading=element("h3",key+" · "+(attrs[2]||attrs[0]));
+  const info=element("p",fields.map((name,i)=>attrs[i]?name+" · "+attrs[i]:null).filter(Boolean).join("  |  "));
+  const marks=dataset.changes.filter(c=>c[2]===key);
+  const note=element("p",marks.length?marks.length+" recorded changes since "+dataset.first:"No recorded changes since the "+dataset.first+" baseline.");
+  const button=element("button",saved.has(key)?"Remove saved prefix":"Save prefix");
+  button.onclick=()=>{
+    if(saved.has(key)) saved.delete(key);else saved.add(key);
+    try {localStorage.setItem("coolcode:prefixdiary:saved",JSON.stringify([...saved]));} catch {}
+    filter();details(key);
+  };
+  box.replaceChildren(heading,info,note,...marks.slice(-20).reverse().map(([a,b,,old,next])=>element("p",b+" · "+changedFields(old,next))),button);
+  box.hidden=false;
+  if(focus) {heading.tabIndex=-1;heading.focus();}
 }
-input.addEventListener('input', update);
-document.querySelector('#sample').addEventListener('click', () => {
-  input.value = '  Halifax\nLangley\nHalifax\n\nVancouver  ';
-  update();
-});
-document.querySelector('#clear').addEventListener('click', () => {
-  input.value = '';
-  update();
-  input.focus();
-});
-if (navigator.clipboard && window.isSecureContext) {
-  copy.hidden = false;
-  copy.disabled = true;
-  copy.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(output.value);
-      status.textContent = 'Result copied.';
-    } catch {
-      output.focus();
-      output.select();
-      status.textContent = 'Copy was unavailable. The result is selected so you can copy it manually.';
-    }
-  });
+function display() {
+  el("rows").replaceChildren(...matches.slice(page*pageSize,(page+1)*pageSize).map(([key,d])=>{
+    const tr=element("tr"), cell=element("td"), link=element("button",key);
+    link.onclick=()=>details(key,true);cell.append(link);tr.append(cell);
+    for (const value of [d[2],d[3],d[4],d[0]]) tr.append(element("td",value||"—"));
+    return tr;
+  }));
+  el("summary").textContent=matches.length?matches.length.toLocaleString()+" matches · "+(page*pageSize+1)+"–"+Math.min(matches.length,(page+1)*pageSize):"No matching prefixes.";
+  el("prev").disabled=page===0;el("next").disabled=(page+1)*pageSize>=matches.length;
+  el("download").disabled=!matches.length;
 }
-// Namespace future preference storage as coolcode:<tool-id>:<key>.
-// Do not persist pasted text or uploads by default.
+function history(){
+  const keys=new Set(matches.map(r=>r[0]));
+  const changes=dataset.changes.filter(c=>keys.has(c[2]) || (!c[4] && selectRows([[c[2],c[3]]],el("area").value,el("status").value,el("query").value,el("saved").checked?saved:null).length));
+  el("history-note").textContent="Baseline "+dataset.first+" · "+changes.length+" matching changes observed through "+dataset.latest+". Assignment dates above come from the publisher. Changes are dated by the editions in which they appeared.";
+  el("history").replaceChildren(...changes.slice(-60).reverse().map(([earlier,later,key,before,after])=>element("p",key+" · "+earlier+" → "+later+" · "+changedFields(before,after))));
+}
+function filter(){ page=0;matches=selectRows(all,el("area").value,el("status").value,el("query").value,el("saved").checked?saved:null);el("record").hidden=true;display();history(); }
+try {
+  const [status,records]=await loadData();dataset=records;all=Object.entries(records.rows).sort(([a],[b])=>a.localeCompare(b));
+  for(const n of [...new Set(all.map(([key])=>key.slice(0,3)))]) el("area").add(option(n));
+  for(const name of [...new Set(all.map(([,d])=>d[0]))].sort()) el("status").add(option(name));
+  el("edition").textContent=status.count.toLocaleString()+" prefixes · "+status.areas+" area codes · CNA edition "+status.latest+" · retrieved "+status.retrieved;
+  for(const id of ["area","status","saved"]) el(id).onchange=filter;
+  el("query").oninput=filter;
+  el("prev").onclick=()=>{page--;display()};el("next").onclick=()=>{page++;display()};
+  el("download").onclick=()=>csvDownload("prefixdiary-"+dataset.latest+".csv",[["Prefix",...fields],...matches.map(([key,d])=>[key,...d])]);
+  el("area").value="604";filter();
+} catch {el("edition").textContent="Unable to load the published snapshot. Try reloading or use the CNA source below.";}

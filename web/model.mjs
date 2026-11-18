@@ -1,7 +1,12 @@
-// Keep transformations separate from the DOM so they can be tested directly.
-export function cleanLines(text) {
-  if (typeof text !== 'string') throw new TypeError('Expected text');
-  const lines = text.split(/\r\n|\r|\n/).map(line => line.trim()).filter(Boolean);
-  const unique = [...new Set(lines)];
-  return { text: unique.join('\n'), count: unique.length, removed: lines.length - unique.length };
+export const fields = ["Status","Pooled","Exchange","Province","Company","OCN","Date assigned","Remarks"];
+export function selectRows(rows,area,status,query,saved) {
+  const needle=query.trim().toLowerCase().replace(/^(\d{3})[ -]?(\d{3})$/,"$1-$2");
+  return rows.filter(([key,fields])=>
+    (!area || key.startsWith(area+"-")) && (!status || fields[0]===status) &&
+    (!saved || saved.has(key)) && (!needle || [key,...fields].join(" ").toLowerCase().includes(needle)));
+}
+export function changedFields(before,after) {
+  if (!before) return "First listed · "+after[0];
+  if (!after) return "Removed from the edition";
+  return fields.flatMap((label,i)=>before[i]===after[i]?[]:[label+" "+(before[i]||"—")+" → "+(after[i]||"—")]).join(" · ");
 }
