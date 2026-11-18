@@ -29,22 +29,26 @@ def main():
                 errors = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
                 page.goto(f"http://127.0.0.1:{server.server_port}/example-tool/")
-                page.locator("#sample").click()
-                assert page.locator("#output").input_value() == "Halifax\nLangley\nVancouver"
-                assert "1 duplicate removed" in page.locator("#status").inner_text()
-                page.locator("#input").fill('<img src=x onerror="alert(1)">\n<img src=x onerror="alert(1)">')
-                assert page.locator("#output").input_value() == '<img src=x onerror="alert(1)">'
-                assert page.locator("img").count() == 0
-                page.locator("#clear").click()
-                assert page.locator("#output").input_value() == ""
-                page.locator("#sample").click()
+
+                page.locator("#rows tr").first.wait_for()
+                page.locator("#area").select_option("902")
+                page.locator("#query").fill("Halifax")
+                assert "Halifax" in page.locator("#rows").inner_text()
+                page.locator("#rows button").first.click()
+                page.get_by_role("button", name="Save prefix", exact=True).click()
+                page.locator("#saved").check()
+                assert page.locator("#rows tr").count()==1
+                page.locator("#query").fill("zzzz_no_prefix")
+                assert page.locator("#rows tr").count()==0
+                page.locator("#query").fill("")
+                page.locator("#saved").uncheck()
                 page.screenshot(path=str(screenshots / "desktop.png"), full_page=True)
                 page.set_viewport_size({"width": 390, "height": 844})
                 assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
                 page.screenshot(path=str(screenshots / "mobile.png"), full_page=True)
                 assert not errors, errors
                 browser.close()
-            print("Browser checks passed: project subpath, sample, clear, safe text and mobile layout")
+            print("Browser checks passed: project subpath, source data, filtering and mobile layout")
         finally:
             server.shutdown()
 
