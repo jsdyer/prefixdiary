@@ -2,7 +2,7 @@ name: Refresh source records
 on:
   push:
     branches: [main]
-    paths: ['scripts/refresh.py', '.github/workflows/refresh.yml']
+    paths: ['scripts/refresh.py', 'scripts/refresh_ip.py', '.github/workflows/refresh.yml']
   schedule:
     - cron: '22 10 * * 2-6'
   workflow_dispatch:
@@ -25,6 +25,7 @@ jobs:
       - name: Fetch and validate
         run: |
           python3 scripts/refresh.py
+          python3 scripts/refresh_ip.py
           python3 -m unittest discover -s tests
           python3 scripts/build.py
       - name: Save the snapshot and publish

@@ -46,6 +46,17 @@ def main():
                 page.set_viewport_size({"width": 390, "height": 844})
                 assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
                 page.screenshot(path=str(screenshots / "mobile.png"), full_page=True)
+                page.get_by_role("link", name="Look up Canadian IPv4 and IPv6 registrations").click()
+                page.locator("#matches tr").first.wait_for()
+                assert "137.82.0.0/16" in page.locator("#matches").inner_text()
+                page.get_by_role("button", name="BCNET · IPv6").click()
+                assert page.locator("#matches tr").count() == 3
+                assert "2607:f8f0::/32" in page.locator("#matches").inner_text()
+                page.locator("#query").fill("192.0.2.1")
+                page.get_by_role("button", name="Look up", exact=True).click()
+                assert "No matching CA registration" in page.locator("#matches").inner_text()
+                assert page.get_by_role("link", name="Check observed BGP routing").get_attribute("href").endswith("q=192.0.2.1")
+                assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
                 assert not errors, errors
                 browser.close()
             print("Browser checks passed: project subpath, source data, filtering and mobile layout")

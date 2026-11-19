@@ -1,7 +1,7 @@
 {
   "id": "prefixdiary",
   "title": "Prefix Diary",
-  "description": "Look up a Canadian telephone prefix, explore exchanges and follow changes between published assignments.",
+  "description": "Look up Canadian telephone assignments and trace IPv4 or IPv6 registration blocks across ARIN reports.",
   "category": "liminal-tools",
   "tags": [
     "Canada",
@@ -9,7 +9,10 @@
     "carrier",
     "604",
     "902",
-    "exchange"
+    "exchange",
+    "IPv4",
+    "IPv6",
+    "ARIN"
   ],
   "icon": "network",
   "url": "/prefixdiary/",
@@ -18,7 +21,7 @@
   "access": "browser",
   "data_info": {
     "mode": "snapshot",
-    "detail": "The Canadian Numbering Administrator publishes NPA–NXX assignments, exchange areas and company names each weekday night.",
+    "detail": "The Canadian Numbering Administrator supplies telephone assignments. ARIN publishes dated IPv4 and IPv6 delegations by registration economy.",
     "cadence": "Weekdays",
     "probes": [
       {
@@ -40,6 +43,19 @@
         "path": [
           "latest"
         ]
+      },
+      {
+        "label": "IP report date",
+        "url": "https://coolcode.ca/prefixdiary/ip/status.json",
+        "path": [
+          "latest"
+        ],
+        "count_at": {
+          "path": [
+            "count"
+          ],
+          "unit": "IP registration records"
+        }
       }
     ]
   }
