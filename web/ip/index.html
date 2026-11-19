@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Canadian IP registrations · Prefix Diary</title>
+  <meta name="description" content="Find IPv4 and IPv6 addresses in Canadian registration records from three ARIN editions.">
+  <link rel="stylesheet" href="../style.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <header><a href="../">← Prefix Diary</a><a href="https://github.com/jsdyer/prefixdiary#canadian-ip-registrations">Sources and guide ↗</a></header>
+  <main>
+    <div class="hero"><h1>Canadian IP registrations</h1>
+      <p>Look up an IPv4 address, IPv6 address or CIDR block in three editions of ARIN’s delegation statistics.</p>
+      <p class="meta" id="edition">Loading registry extracts…</p>
+    </div>
+    <section class="panel">
+      <h2>Find an address block</h2>
+      <form id="lookup">
+        <label class="search">IP address or CIDR block
+          <input id="query" type="search" value="137.82.0.0" maxlength="80" autocapitalize="none" spellcheck="false" required>
+        </label>
+        <button type="submit">Look up</button>
+      </form>
+      <div class="examples" aria-label="Examples">
+        <button type="button" class="ghost" data-ip="137.82.0.0">UBC · IPv4</button>
+        <button type="button" class="ghost" data-ip="129.173.0.0">Dalhousie · IPv4</button>
+        <button type="button" class="ghost" data-ip="2607:f8f0::">BCNET · IPv6</button>
+      </div>
+      <p class="summary" id="result" role="status"></p>
+      <div class="scroller"><table aria-label="Matching registration records">
+        <thead><tr><th>Report date</th><th>Registered block or range</th><th>Source status</th><th>Registration date</th></tr></thead>
+        <tbody id="matches"></tbody>
+      </table></div>
+      <p class="summary" id="handoff"></p>
+    </section>
+    <section class="panel">
+      <h2>Canadian records in each edition</h2>
+      <p class="summary">ARIN’s CA code describes the registered organization’s economy. Each row counts address-block records. Block sizes vary. Device locations, subscribers and routes require different evidence.</p>
+      <div class="scroller"><table aria-label="Registry edition coverage">
+        <thead><tr><th>Report date</th><th>IPv4 records</th><th>IPv6 records</th><th>Edition source</th></tr></thead>
+        <tbody id="coverage"></tbody>
+      </table></div>
+      <p class="summary">The registration date comes from ARIN’s record and can predate the report by decades. Report dates bracket observations; the intervening editions are outside this comparison. Status changes can reflect registry classification.</p>
+    </section>
+  </main>
+  <footer><a href="../">Telephone exchange assignments</a> · <a href="https://www.arin.net/reference/research/statistics/nro_stats/">ARIN delegation statistics</a></footer>
+</body>
+</html>
