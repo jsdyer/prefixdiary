@@ -22,7 +22,7 @@
   "data_info": {
     "mode": "snapshot",
     "detail": "The Canadian Numbering Administrator supplies telephone assignments. ARIN publishes dated IPv4 and IPv6 delegations by registration economy.",
-    "cadence": "Weekdays",
+    "cadence": "Tuesday–Saturday (UTC)",
     "probes": [
       {
         "label": "Data retrieved",
