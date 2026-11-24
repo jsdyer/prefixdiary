@@ -27,3 +27,11 @@ The report date identifies the edition. The registration date can be unknown or 
 The [Canadian Numbering Administrator](https://cnac.ca/co_codes/co_code_status.htm) publishes a national [CO Code Status ZIP](https://cnac.ca/data/COCodeStatus_ALL.zip) on weekday nights. The publisher’s date comes from the CSV header record. The separate retrieved date records a successful UTC download. The Tuesday–Saturday GitHub Action follows the expected weekday-night Canadian publications. An older, duplicate-key or incomplete directory is rejected.
 
 Run `python3 scripts/refresh.py` to fetch and compare telephone records and `python3 scripts/refresh_ip.py` for the ARIN extracts. The weekday workflow checks both sources. The IP importer reuses the two validated fixed archives and updates the latest report. Keep the previous `web/records.json.gz` when running it so observed history carries forward. Run `node --test tests/*.test.mjs`, `python3 -m unittest discover -s tests` and `python3 scripts/build.py`. The site works from the committed snapshot and keeps searches in your browser.
+
+<!-- schedule-reliability -->
+## Schedule reliability
+
+Public GitHub repositories can have scheduled workflows disabled after 60 days of inactivity. A separate weekly [schedule guard](.github/workflows/schedule-guard.yml) calls GitHub's enable-workflow API for an explicit list of refresh workflows and itself. It can restore workflows disabled for inactivity, preserves manually disabled workflows, and runs independently of collection failures.
+
+This is an interim mitigation, not a scheduling guarantee: GitHub does not document active-workflow renewal as a permanent exemption, and scheduled runs can be delayed or dropped. A scheduler on our own Linux server is the planned independent trigger. The guard does not collect data, create dummy commits, or change source/check timestamps; successful collection and published data freshness still need monitoring.
+<!-- /schedule-reliability -->
