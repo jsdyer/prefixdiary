@@ -4,6 +4,14 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      refreshed:
+        description: Publish the latest committed data from main
+        type: boolean
+        default: false
+concurrency:
+  group: prefixdiary-pages-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -15,6 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
+          # A refresh can dispatch before GitHub updates the event's cached branch SHA.
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.refreshed && 'main' || github.sha }}
           persist-credentials: false
       - uses: actions/setup-python@v6
         with:

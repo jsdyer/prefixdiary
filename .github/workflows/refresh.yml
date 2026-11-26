@@ -37,4 +37,4 @@ jobs:
             git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "Refresh published source records"
             git push origin HEAD:main
           fi
-          gh workflow run pages.yml --ref main
+          gh workflow run pages.yml --ref main -f refreshed=true
