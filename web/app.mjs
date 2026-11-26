@@ -1,5 +1,5 @@
 import {byId as el, element, option, loadData, csvDownload} from "./shared.mjs";
-import {fields,selectRows,changedFields} from "./model.mjs";
+import {fields,selectRows,changedFields,phoneParts} from "./model.mjs";
 const pageSize=35;
 let all=[], matches=[], page=0, dataset, currentKey;
 let saved=new Set();
@@ -38,7 +38,27 @@ function history(){
   el("history-note").textContent="Baseline "+dataset.first+" · "+changes.length+" matching changes observed through "+dataset.latest+". Assignment dates above come from the publisher. Changes are dated by the editions in which they appeared.";
   el("history").replaceChildren(...changes.slice(-60).reverse().map(([earlier,later,key,before,after])=>element("p",key+" · "+earlier+" → "+later+" · "+changedFields(before,after))));
 }
-function filter(){ page=0;matches=selectRows(all,el("area").value,el("status").value,el("query").value,el("saved").checked?saved:null);el("record").hidden=true;display();history(); }
+let blocks;
+const blockStatus = {AV:'Available',AF:'Available (future)',AP:'Available (pending)',AS:'Assigned',IS:'In service',BR:'Being recovered',RA:'Recovered / aging'};
+function showBlock() {
+  const number = phoneParts(el("query").value);
+  const note = el("block");
+  note.textContent = "";
+  if (!number?.block) return;
+  if (!blocks) {
+    note.textContent = "Thousands-block data is unavailable. The table shows prefix-level assignments.";
+    return;
+  }
+  const details = blocks.rows[number.block];
+  if (!details) {
+    note.textContent = "No separate thousands-block entry for " + number.block + " in the " + blocks.edition + " CNA edition. See the prefix assignment below.";
+    return;
+  }
+  const [status, holder, codeHolder, assigned] = details;
+  note.textContent = [number.block + "xxx", blockStatus[status] || status, holder ? "Block holder: " + holder : "No separate block holder listed",
+    codeHolder && "Prefix holder: " + codeHolder, assigned && "Assigned " + assigned, "CNA edition " + blocks.edition].filter(Boolean).join(" · ");
+}
+function filter(){ page=0;matches=selectRows(all,el("area").value,el("status").value,el("query").value,el("saved").checked?saved:null);el("record").hidden=true;display();history();showBlock(); }
 try {
   const [status,records]=await loadData();dataset=records;all=Object.entries(records.rows).sort(([a],[b])=>a.localeCompare(b));
   for(const n of [...new Set(all.map(([key])=>key.slice(0,3)))]) el("area").add(option(n));
@@ -48,5 +68,11 @@ try {
   el("query").oninput=filter;
   el("prev").onclick=()=>{page--;display()};el("next").onclick=()=>{page++;display()};
   el("download").onclick=()=>csvDownload("prefixdiary-"+dataset.latest+".csv",[["Prefix",...fields],...matches.map(([key,d])=>[key,...d])]);
-  el("area").value="604";filter();
+  el("query").value = document.body.dataset.query || "";
+  filter();
+  try {
+    const response = await fetch(new URL("./blocks.json", import.meta.url));
+    if (response.ok) blocks = await response.json();
+  } catch { /* Prefix-level records remain available. */ }
+  showBlock();
 } catch {el("edition").textContent="Unable to load the published snapshot. Try reloading or use the CNA source below.";}

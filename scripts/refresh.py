@@ -62,6 +62,8 @@ def update(payload, path=ROOT):
 
 
 if __name__=='__main__':
+    from refresh_blocks import refresh_blocks
+    refresh_blocks()
     req=Request(SOURCE,headers={'User-Agent':'CoolCode Prefix Diary (+https://coolcode.ca/prefixdiary/)'})
     with urlopen(req,timeout=50) as response:
         update(response.read())

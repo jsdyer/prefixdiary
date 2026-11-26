@@ -6,7 +6,7 @@ export function element(tag, text) {
 }
 export function option(value, label=value) { return new Option(label,value); }
 export async function loadData() {
-  const [status,record] = await Promise.all(["./status.json","./records.json.gz"].map(path => fetch(path)));
+  const [status,record] = await Promise.all(["./status.json","./records.json.gz"].map(path => fetch(new URL(path, import.meta.url))));
   if (!status.ok || !record.ok) throw Error("Snapshot unavailable");
   const bytes = new Uint8Array(await record.arrayBuffer());
   const body = bytes[0] === 31 && bytes[1] === 139 ? new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip")) : bytes;

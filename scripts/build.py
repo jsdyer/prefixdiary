@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build a browser tool using Python's standard library; no network required."""
 from html import escape
+from search_pages import render_pages, PAGES
 import json
 from pathlib import Path
 import re
@@ -61,6 +62,7 @@ def build(root=ROOT):
         if re.search(r"\{\{[A-Z_]+\}\}", page):
             raise ValueError("Unresolved template placeholder in web/index.html")
         index.write_text(page, encoding="utf-8")
+        render_pages(stage, tool, PAGES)
         (stage / ".nojekyll").touch()
         if output.exists():
             shutil.rmtree(output)

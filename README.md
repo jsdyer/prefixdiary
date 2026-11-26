@@ -3,6 +3,8 @@
 [Open Prefix Diary](https://coolcode.ca/prefixdiary/) to search geographic Canadian NPA–NXX codes and see how their published assignments change over time. Choose 604 or 902, an exchange, a carrier or a status. Select a prefix to inspect its OCN, source assignment date, remarks and observed changes.
 
 <!-- coolcode:guide -->
+Paste a formatted phone number, including +1, for a local prefix and thousands-block lookup. [Halifax](https://coolcode.ca/prefixdiary/halifax-phone-prefixes/) and [Vancouver](https://coolcode.ca/prefixdiary/vancouver-phone-prefixes/) open the directory filtered across area codes. CNA records describe assignments. Number portability and spoofing limit what they tell you about a caller.
+
 Search 902 and Halifax for telephone assignments. In Canadian IP registrations, compare UBC’s IPv4 block or BCNET’s IPv6 block in the 2016, 2020 and latest ARIN editions, then open its observed routing history.
 <!-- /coolcode:guide -->
 

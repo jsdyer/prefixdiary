@@ -1,7 +1,7 @@
 {
   "id": "prefixdiary",
-  "title": "Prefix Diary",
-  "description": "Look up Canadian telephone assignments and trace IPv4 or IPv6 registration blocks across ARIN reports.",
+  "title": "Canadian Phone Prefix Lookup",
+  "description": "Paste a Canadian phone number or search by city to find its numbering-block assignment, exchange and province.",
   "category": "liminal-tools",
   "tags": [
     "Canada",

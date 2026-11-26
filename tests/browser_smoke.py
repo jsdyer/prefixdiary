@@ -28,6 +28,10 @@ def main():
                 page = browser.new_page(viewport={"width": 1280, "height": 1000})
                 errors = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
+                page.goto(f"http://127.0.0.1:{server.server_port}/example-tool/halifax-phone-prefixes/")
+                page.wait_for_function("document.getElementById('query').value === 'Halifax'")
+                page.locator("#query").fill("+1 (942) 945-4123")
+                page.wait_for_function("document.getElementById('block').textContent.includes('942-945-4xxx')")
                 page.goto(f"http://127.0.0.1:{server.server_port}/example-tool/")
 
                 page.locator("#rows tr").first.wait_for()
