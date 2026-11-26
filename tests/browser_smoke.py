@@ -35,6 +35,9 @@ def main():
                 page.goto(f"http://127.0.0.1:{server.server_port}/example-tool/")
 
                 page.locator("#rows tr").first.wait_for()
+                page.locator("#example").click()
+                assert page.locator("#query").input_value() == "604-200"
+                assert "New Westminster" in page.locator("#summary").inner_text()
                 page.locator("#area").select_option("902")
                 page.locator("#query").fill("Halifax")
                 assert "Halifax" in page.locator("#rows").inner_text()

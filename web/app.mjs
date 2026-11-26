@@ -28,7 +28,11 @@ function display() {
     for (const value of [d[2],d[3],d[4],d[0]]) tr.append(element("td",value||"—"));
     return tr;
   }));
-  el("summary").textContent=matches.length?matches.length.toLocaleString()+" matches · "+(page*pageSize+1)+"–"+Math.min(matches.length,(page+1)*pageSize):"No matching prefixes.";
+  const unique = matches.length === 1 && el("query").value.trim();
+  const [prefix, record] = unique ? matches[0] : [];
+  el("summary").textContent=unique
+    ? [prefix, [record[2], record[3]].filter(Boolean).join(", "), record[4] && "Assignment holder: " + record[4], record[0]].filter(Boolean).join(" · ")
+    : matches.length?matches.length.toLocaleString()+" matches · "+(page*pageSize+1)+"–"+Math.min(matches.length,(page+1)*pageSize):"No matching prefixes.";
   el("prev").disabled=page===0;el("next").disabled=(page+1)*pageSize>=matches.length;
   el("download").disabled=!matches.length;
 }
@@ -58,7 +62,7 @@ function showBlock() {
   note.textContent = [number.block + "xxx", blockStatus[status] || status, holder ? "Block holder: " + holder : "No separate block holder listed",
     codeHolder && "Prefix holder: " + codeHolder, assigned && "Assigned " + assigned, "CNA edition " + blocks.edition].filter(Boolean).join(" · ");
 }
-function filter(){ page=0;matches=selectRows(all,el("area").value,el("status").value,el("query").value,el("saved").checked?saved:null);el("record").hidden=true;display();history();showBlock(); }
+function filter(){ el("example").hidden = Boolean(el("query").value || el("area").value || el("status").value || el("saved").checked);page=0;matches=selectRows(all,el("area").value,el("status").value,el("query").value,el("saved").checked?saved:null);el("record").hidden=true;display();history();showBlock(); }
 try {
   const [status,records]=await loadData();dataset=records;all=Object.entries(records.rows).sort(([a],[b])=>a.localeCompare(b));
   for(const n of [...new Set(all.map(([key])=>key.slice(0,3)))]) el("area").add(option(n));
@@ -68,7 +72,13 @@ try {
   el("query").oninput=filter;
   el("prev").onclick=()=>{page--;display()};el("next").onclick=()=>{page++;display()};
   el("download").onclick=()=>csvDownload("prefixdiary-"+dataset.latest+".csv",[["Prefix",...fields],...matches.map(([key,d])=>[key,...d])]);
-  el("query").value = document.body.dataset.query || "";
+  if (!el("query").value) el("query").value = document.body.dataset.query || "";
+  el("example").onclick = () => {
+    el("query").value = "604-200";
+    filter();
+    el("summary").tabIndex = -1;
+    el("summary").focus();
+  };
   filter();
   try {
     const response = await fetch(new URL("./blocks.json", import.meta.url));
