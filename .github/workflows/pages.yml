@@ -26,7 +26,7 @@ jobs:
           # A refresh can dispatch before GitHub updates the event's cached branch SHA.
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.refreshed && 'main' || github.sha }}
           persist-credentials: false
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - uses: actions/setup-node@v6
